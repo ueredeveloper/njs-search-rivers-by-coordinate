@@ -1,69 +1,23 @@
+// index.js
+const express = require('express');
+const app = express();
+const port = 3315;
 
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+// Serve static files from the public folder
+app.use(express.static('public'));
 
-const server = http.createServer((req, res) => {
-    let filePath = './public' + req.url;
+// Import routes
+const indexRoutes = require('./routes/index');
 
-    if (filePath === './public/') {
-        filePath = './public/index.html';
-    }
+// Use routes
+app.use('/services', indexRoutes);
 
-    const extname = String(path.extname(filePath)).toLowerCase();
-    const contentType = {
-        '.html': 'text/html',
-        '.js': 'text/javascript',
-        '.css': 'text/css',
-        '.json': 'application/json',
-        '.png': 'image/png',
-        '.jpg': 'image/jpg',
-        '.gif': 'image/gif',
-        '.wav': 'audio/wav',
-        '.mp4': 'video/mp4',
-        '.woff': 'application/font-woff',
-        '.ttf': 'application/font-ttf',
-        '.eot': 'application/vnd.ms-fontobject',
-        '.otf': 'application/font-otf',
-        '.svg': 'image/svg+xml',
-    }[extname] || 'application/octet-stream';
-
-    fs.readFile(filePath, (err, content) => {
-        if (err) {
-            if (err.code === 'ENOENT') {
-                res.writeHead(404);
-                res.end('404 Not Found');
-            } else {
-                res.writeHead(500);
-                res.end('500 Internal Server Error');
-            }
-        } else {
-            res.writeHead(200, { 'Content-Type': contentType });
-            res.end(content, 'utf-8');
-        }
-    });
+// Page and Map
+app.get('/', (req, res) => {
+    res.sendFile('index.html', { root: 'public' });
 });
 
-const port = 3000;
-server.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}/`);
+// Start the server
+app.listen(port, () => {
+  console.log(`Server is running at http://localhost:${port}`);
 });
-
-
-
-/*let turf = require('@turf/turf');
-
-var center = [-75, 40];
-var xSemiAxis = 5;
-var ySemiAxis = 2;
-var ellipse = turf.ellipse(center, xSemiAxis, ySemiAxis);
-
-//console.log(ellipse.geometry.coordinates);
-
-
-var line1 = turf.lineString([[126, -11], [129, -21]]);
-var line2 = turf.lineString([[123, -18], [131, -14]]);
-var intersects = turf.lineIntersect(line1, line2);
-
-
-console.log(intersects.features[0].geometry);*/
