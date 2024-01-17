@@ -5,8 +5,8 @@ const rivers = require('../json/rios-df-141223.json');
 
 router.get('/getAllRivers', (req, res) => {
 
-  const lines = rivers.features.slice(0, 40).map(river => {
-    return turf.lineString(river.geometry.coordinates)
+  const lines = rivers.features.slice(0, 80).map(river => {
+    return river;
   })
   res.send(lines)
 });
@@ -25,17 +25,22 @@ router.get('/getFilteredRivers', (req, res) => {
 
   const point = turf.point([-47.89642922232735, -15.682590950535907]);
 
-  const lines = rivers.features.slice(0, 40).map(river => {
-    return turf.lineString(river.geometry.coordinates)
+  const lines = rivers.features.slice(0, 80).map(river => {
+    //return turf.lineString(river.geometry.coordinates)
+    //return { properties: river.properties, coordinates: turf.lineString(river.geometry.coordinates) }
+    return { ...river, lineString: turf.lineString(river.geometry.coordinates) }
   })
 
   const nearestPoints = lines.map(line => {
-    return { ...line, properties: turf.nearestPointOnLine(line, point) }
+    return {
+      ...line,
+      nearestPointOnLine: turf.nearestPointOnLine(line.lineString, point)
+    }
   });
 
-  nearestPoints.sort((a, b) => a.properties.properties.dist - b.properties.properties.dist);
+  nearestPoints.sort((a, b) => a.nearestPointOnLine.properties.dist - b.nearestPointOnLine.properties.dist);
 
-  const closestLines = nearestPoints.slice(0, 5).map(result => result);
+  const closestLines = nearestPoints.slice(0, 10).map(result => result);
 
   res.send(closestLines);
 
